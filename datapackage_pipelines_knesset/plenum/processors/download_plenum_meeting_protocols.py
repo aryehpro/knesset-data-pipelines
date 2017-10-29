@@ -1,9 +1,13 @@
+import logging
+import os
 import re
+import requests
+import time
 
-from datapackage_pipelines_knesset.common.processors.base_processor import BaseProcessor
 from requests.exceptions import RequestException
-import os, requests, logging, time, json
+
 from datapackage_pipelines_knesset.common import object_storage
+from datapackage_pipelines_knesset.common.processors.base_processor import BaseProcessor
 
 
 class DownloadPlenumMeetingProtocolsProcessor(BaseProcessor):
@@ -31,12 +35,13 @@ class DownloadPlenumMeetingProtocolsProcessor(BaseProcessor):
     def _process(self, datapackage, resources):
         return self._process_filter(datapackage, resources)
 
-    def _reuqests_get(self, url):
+    @staticmethod
+    def _requests_get(url):
         return requests.get(url)
 
     def _save_url(self, url, bucket, object_name, num_retries, seconds_between_retries, retry_num=1):
         try:
-            res = self._reuqests_get(url)
+            res = self._requests_get(url)
         except RequestException as e:
             if retry_num < num_retries:
                 logging.exception(e)
